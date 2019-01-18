@@ -11,6 +11,8 @@ public class sdad {
     public String test01(){
         String asd = "2364564";
         System.out.println(asd);
+        
+        System.out.println("这是从网页上添加的");
         return "asd";
     }
 
