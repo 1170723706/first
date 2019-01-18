@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>大标题</title>
+
+    <script src="/js/jquery-2.1.1.min.js"></script>
+
+    <link rel="stylesheet" href="/js/bootstrap-3.3.7-dist/css/bootstrap.css">
+    <script src="/js/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/js/bootStrap-addTabs/bootstrap.addtabs.css">
+    <script src="/js/bootStrap-addTabs/bootstrap.addtabs.min.js"></script>
+
+    <link rel="stylesheet" href="/js/bootstrap-treeview/bootstrap-treeview.min.css">
+    <script src="/js/bootstrap-treeview/bootstrap-treeview.min.js"></script>
+
+</head>
+<script type="text/javascript">
+    function getTree() {
+        $.ajax({
+            url: "/tree/getTree",
+            type: "POST",
+            success: function (pageUtil) {
+                $('#tree').treeview({
+                    data: pageUtil,
+                    onNodeSelected: function (event, node) {
+                        //设置高度
+                        $.addtabs({iframeHeight: 650});
+                        //增加选项卡（tabs）
+                        //console.log(node.href)
+                        $.addtabs.add({
+                            id: node.id,
+                            title: node.text,
+                            url: "/login/" + node.href,
+                        })
+                    }
+                })
+            },
+            error: function () {
+                alert("失败了");
+            }
+        });
+    }
+
+    $(function () {
+        getTree();
+    })
+</script>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3">
+            <div id="tree"></div>
+        </div>
+        <div class="col-lg-9">
+
+            <div id="myTabs">
+                <div>
+                    <!-- 新选项卡 -->
+                    <ul class="nav nav-tabs">
+                    </ul>
+                    <!-- 选项卡下内容 -->
+                    <div class="tab-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

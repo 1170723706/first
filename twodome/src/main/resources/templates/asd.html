@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>asd页面</title>
+
+
+    <script src="/js/jquery-2.1.1.min.js"></script>
+    <script src="/js/layer/layer.js"></script>
+
+    <link rel="stylesheet" href="/js/bootstrap-3.3.7-dist/css/bootstrap.css">
+    <script src="/js/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/js/bootstrap-table/bootstrap-table.css">
+    <script src="/js/bootstrap-table/bootstrap-table.js"></script>
+
+    <script src="/js/bootstrap-bootbox/bootbox.js"></script>
+
+</head>
+<script type="text/javascript">
+    $(function () {
+        loadTaxisDate();
+    })
+    function loadTaxisDate() {
+        $("#tableId").bootstrapTable({
+            url:'/login/getCommodity',
+            striped:true,//是否显示斑马线效果。
+            toolbar: '#tb',//在<div>标签上定义工具栏：
+            pagination:true, //是否展示分页     //获取数据地址
+            pageList:[1,2,3,4,6,7,9,12],
+            pageSize:3,
+            showColumns:false,//是否显示 内容列下拉框
+            showToggle:false,//是否显示 切换试图（table/card）按钮
+            showPaginationSwitch:false,//是否显示 数据条数选择框
+            showRefresh:false,//是否显示刷新按钮
+            detailView:false,//设置为 true 可以显示详细页面模式。
+            showFooter:false,//是否显示列脚
+            clickToSelect: false, //是否启用点击选中行
+            sidePagination:'server',//默认显示多少条 这个值一定在pagelist中存在
+            queryParams:function(params){
+                return{
+                    page: this.pageNumber,
+                    rows: this.pageSize,
+                };
+            },
+            loadMsg:'正在加载中,休息一下', //加载数据的时候显示提示消息
+            /* 奇数偶数行不同颜色 start */
+            rowStyler: function(index,row){
+                if (index%2==0){
+                    return 'background-color:#D2B48C;color:#8B4513;';
+                }else{
+                    return "background-color:#333333;color:red;";
+                }
+            },
+            /* 奇数偶数行不同颜色 end */
+            columns:[
+                {field:'xxx',title:'',width:50,checkbox:true}, //多选框
+                {field:'id',title:'id',width:100},
+                {field:'name',title:'name',width:100},
+                {field:'price',title:'price',width:100},
+                {field:'photo',title:'photo',width:100},
+                {field:'num',title:'num',width:100},
+                {field:'uptime',title:'uptime',width:100,
+                    formatter:function(value,row,index){
+                        var mydate = new Date(value);
+                        var str = mydate.toLocaleDateString();
+                        return str;
+                    }},
+                {field: 'xx2', title: '操作', width: 200, align: 'right',
+                    formatter: function (value, row, index) {
+                        var content = "<a href='javascript:void(0)' onclick=updateEdu(" + row.id + ")>修改</a>";
+                        content += " | <a href='javascript:void(0)' onclick=deleteItem(" + row.id + ")>删除</a>";
+                        return content;
+                    },
+                }
+            ],
+            checkOnSelect:false,//只能选中一行
+        });
+    }
+    function deleteItem(ids){
+        if(ids != null && ids != ""){
+                    $.ajax({
+                        url:"/login/del",
+                        type:"POST",
+                        data:{ids:ids},
+                        success:function(pageUtil){
+                            layer.msg("删除成功！！！")
+                            //reload 会重新请求数据 但会停留在当前页
+                            $("#tableId").datagrid('reload');
+                        },
+                        error:function(){
+                            alert("失败了");
+                        }
+                    });
+        }else{
+            layer.msg("请先选中！！！")
+        }
+    }
+    function removes(){
+        var rows = $("#tableId").datagrid('getChecked');
+        var ids = "";
+        $.each(rows,function(index,obj){
+            ids += ids== ''?obj.id:","+obj.id;
+        });
+        deleteItem(ids);
+    }
+    function updateEdu(id){
+        $.ajax({
+            url:"/login/queryCom",
+            type:"POST",
+            data:{id:id},
+            success:function(result){
+                add();
+                console.log(result);
+                $("#name").val(result.name);
+                $("#price").val(result.price);
+                $("#num").val(result.num);
+                $("#time").val(result.uptime);
+
+            },
+            error : function() {
+                alert("ajax访问失败了,查看控制台");
+            }
+        });
+    }
+    function add(){
+        $.ajax({
+            url:"/login/add",
+            type:"POST",
+            success:function(pageUtil){
+                bootbox.dialog({
+                    title :'新增商品',
+                    message:pageUtil,
+                    buttons: {
+                        confirm: {
+                            label: '保存',
+                            className: 'btn-success',
+                            "callback" : function() {
+                                $.ajax({
+                                    url:"/login/addQwe",
+                                    type:"POST",
+                                    data:$("#form").serialize(),
+                                    success:function(result){
+                                        $('#tableId').bootstrapTable('refresh');
+                                    },
+                                    error:function(){
+                                        alert("ajax访问失败了,查看控制台");
+                                    }
+                                });
+
+                            }
+                        },
+                        cancel: {
+                            label: '取消',
+                            className: 'btn-danger'
+                        }
+                    },
+                })
+
+            },
+            error:function(){
+                alert("失败了");
+            }
+        });
+    }
+</script>
+<body>
+<div id="tb">
+    <a onclick="add()" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a onclick="removes()" class="easyui-linkbutton" data-options="iconCls:'icon-add'">批量删除</a>
+</div>
+<table id="tableId" fit=true></table>
+
+</body>
+</html>
